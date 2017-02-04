@@ -30,3 +30,10 @@ rescue GoogleIDToken::ValidationError => e
 end
 ```
 
+## Development and Tests
+
+Tests are written with rspec and Appraisal is used to run them against multiple versions of JWT.
+
+```bash
+bundle exec appraisal rspec
+```

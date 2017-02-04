@@ -36,8 +36,15 @@ module GoogleIDToken
   class AudienceMismatchError < ValidationError; end
   class ClientIDMismatchError < ValidationError; end
 
-  class Validator
+  def self.jwt_verifies_expiration?
+    Gem.loaded_specs['jwt'].version >= Gem::Version.new('1.2.0')
+  end
 
+  unless jwt_verifies_expiration?
+    class JWT::ExpiredSignature < StandardError; end
+  end
+
+  class Validator
     GOOGLE_CERTS_URI = 'https://www.googleapis.com/oauth2/v1/certs'
     GOOGLE_CERTS_EXPIRY = 86400 # 1 day
 
@@ -105,8 +112,10 @@ module GoogleIDToken
       @certs.detect do |key, cert|
         begin
           public_key = cert.public_key
-          decoded_token = JWT.decode(token, public_key, !!public_key)
+          decoded_token = ::JWT.decode(token, public_key, !!public_key)
           payload = decoded_token.first
+
+          verify_expiration(payload) unless GoogleIDToken.jwt_verifies_expiration?
 
           # in Feb 2013, the 'cid' claim became the 'azp' claim per changes
           #  in the OIDC draft. At some future point we can go all-azp, but
@@ -119,7 +128,7 @@ module GoogleIDToken
           payload
         rescue JWT::ExpiredSignature
           raise ExpiredTokenError, 'Token signature is expired'
-        rescue JWT::DecodeError => e
+        rescue ::JWT::DecodeError => e
           nil # go on, try the next cert
         end
       end
@@ -178,6 +187,12 @@ module GoogleIDToken
         Time.now > @certs_last_refresh + @certs_expiry
       else
         true
+      end
+    end
+
+    def verify_expiration(payload)
+      if payload.include?('exp')
+        raise JWT::ExpiredSignature.new("Signature has expired") unless payload['exp'] > Time.now.to_i
       end
     end
   end

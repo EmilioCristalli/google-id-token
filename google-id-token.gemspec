@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
   s.summary = 'Google ID Token utilities'
   s.description = 'Google ID Token utilities; currently just a parser/checker'
 
-  s.files = ['lib/google-id-token.rb', 'README.rdoc' ]
+  s.files = ['lib/google-id-token.rb', 'README.md']
 
   s.add_runtime_dependency 'multi_json'
   s.add_runtime_dependency 'jwt', '>= 1'

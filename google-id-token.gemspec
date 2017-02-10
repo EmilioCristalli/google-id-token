@@ -30,7 +30,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'fakeweb'
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec'
-  s.add_development_dependency 'openssl'
 
   s.authors = ['Tim Bray', 'Bob Aman']
   s.email = 'tbray@textuality.com'
